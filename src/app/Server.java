@@ -10,6 +10,7 @@ public class Server {
     private static List<PrintWriter> players = new ArrayList<>(); // Lista de players PrintWriter eu consigo mandar mensagem à ambos.
     private static char[] simbolos = {'X', 'O'};
     private static int turn = 0; // 0 para X, 1 para O
+    @SuppressWarnings("CallToPrintStackTrace")
     public static void main(String[] args){ // Corrigido: String[] args em vez de String args
         int port = 5000;
         try (ServerSocket servidor = new ServerSocket(port)){ // Abre servidor na porta 5000, fecha automaticamete devido ao try.
@@ -23,7 +24,7 @@ public class Server {
                 Thread playerThread = new Thread(new Gerente(socket, i)); //Gerencia o cliente tal no socket tal
                 playerThread.start();
             } // Corrigido: Fechamento do loop for dentro do try
-        } catch (Exception e) { // Corrigido: catch no nível correto do try
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -32,7 +33,6 @@ public class Server {
         private int playerId;
         private BufferedReader in;
         private PrintWriter out;
-
         public Gerente(Socket socket, int playerId) {
             this.socket = socket; //armazena socket
             this.playerId = playerId; //armazena id do player
@@ -50,6 +50,7 @@ public class Server {
                 out.println("Você é " + simbolos[playerId]); //Informa ao jogador qual é seu símbolo no início do jogo.
                 while (true) { //Até o jogo acabar
                     synchronized (Server.class) { //Garante que apenas uma thread (Gerenciador de um jogador) acesse a lógica do turno de cada vez, evitando que ambos os jogadores joguem simultaneamente.
+                        AtualizaTabuleiro();
                         if (turn == playerId) { //Se a vez for do player
                             out.println("Sua vez! Envie a jogada (linha,coluna ex: 0,0)");
                             String move = in.readLine(); //Lê uma linha de texto enviada pelo cliente.
