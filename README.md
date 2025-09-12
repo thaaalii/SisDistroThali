@@ -1,4 +1,4 @@
-Como Jogar:
+Como Jogar: /n
 Compilar:
 cd src/
 javac app/Server.java
