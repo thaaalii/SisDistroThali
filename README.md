@@ -1,4 +1,4 @@
-/*Como Jogar:
+Como Jogar:
 Compilar:
 cd src/
 javac app/Server.java
@@ -8,4 +8,3 @@ java app/Server
 E para cada jogador rode o comando seguinte em diferentes terminais:
 java app/Client
 Pronto, agora voce consegue jogar normalmente.
-*/
