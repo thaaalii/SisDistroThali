@@ -1,4 +1,4 @@
-package app; //Em Java, pacotes organizam classes em namespaces para evitar conflitos de nomes e estruturar projetos
+package app;
 
 import java.io.*; // Entrada e saída
 import java.net.*; // Usar Sockets
@@ -11,7 +11,7 @@ public class Server {
     private static char[] simbolos = {'X', 'O'};
     private static int turn = 0; // 0 para X, 1 para O
     @SuppressWarnings("CallToPrintStackTrace")
-    public static void main(String[] args){ // Corrigido: String[] args em vez de String args
+    public static void main(String[] args){
         int port = 5000;
         try (ServerSocket servidor = new ServerSocket(port)){ // Abre servidor na porta 5000, fecha automaticamete devido ao try.
             System.out.println("Servidor aguardando conexão..."); //Manda atualização sobre o estado atual ao user.
@@ -21,9 +21,8 @@ public class Server {
                 System.out.println("Jogador " + (i + 1) + " conectado!"); //feedback
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true); // Indicar que o Client X ou O pode fazer sua jogada;
                 players.add(out); //Permite que o servidor mande msg para ambos os jogadores quando necessario.
-                Thread playerThread = new Thread(new Gerente(socket, i)); //Gerencia o cliente tal no socket tal
-                playerThread.start();
-            } // Corrigido: Fechamento do loop for dentro do try
+                Thread playerThread = new Thread(new Gerente(socket, i)); //Gerencia o cliente tal no socket tal em sua própria thread
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -48,9 +47,9 @@ public class Server {
         public void run() { //Define o método run, exigido pela interface Runnable, que contém a lógica executada pela thread.
             try { //capturar exceções de I/O durante a execução da thread.
                 out.println("Você é " + simbolos[playerId]); //Informa ao jogador qual é seu símbolo no início do jogo.
+                AtualizaTabuleiro();
                 while (true) { //Até o jogo acabar
                     synchronized (Server.class) { //Garante que apenas uma thread (Gerenciador de um jogador) acesse a lógica do turno de cada vez, evitando que ambos os jogadores joguem simultaneamente.
-                        AtualizaTabuleiro();
                         if (turn == playerId) { //Se a vez for do player
                             out.println("Sua vez! Envie a jogada (linha,coluna ex: 0,0)");
                             String move = in.readLine(); //Lê uma linha de texto enviada pelo cliente.
@@ -96,18 +95,18 @@ public class Server {
             StringBuilder tabuleiroStr = new StringBuilder(); //StringBuilder é uma classe eficiente para concatenar strings dinamicamente
             for (char[] row : tabuleiro) {  //Itera sobre cada linha do tabuleiro
                 tabuleiroStr.append(row[0]).append(" | ").append(row[1]).append(" | ").append(row[2]).append("\n");
-            } // Corrigido: Removido return true de dentro do loop
+            }
             broadcast(tabuleiroStr.toString());
             return true; // Deu certo
         }
         private void broadcast(String message) {
             for (PrintWriter writer : players) { //For each writer dos clientes 
-                try { // Corrigido: Adicionado try-catch para tratar IOException
+                try {
                     writer.println(message); //Manda msg para todos
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } // Corrigido: Adicionado chave de fechamento do for
+            }
         }
         private String ChecaGanhador() {
             for (int i = 0; i < 3; i++) {
